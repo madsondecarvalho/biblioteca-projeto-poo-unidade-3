@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -214,5 +215,46 @@ public class EmprestimoDAO {
         return historico;
     }
     
+    /**
+     * Lista todos os empréstimos do sistema (para admin)
+     */
+    public List<String> listarTodosEmprestimos() {
+        List<String> todosEmprestimos = new ArrayList<>();
+        
+        String sql = "SELECT e.*, l.titulo, u.nome as usuarioNome " +
+                     "FROM Emprestimo e " +
+                     "JOIN Livro l ON e.livroId = l.id " +
+                     "JOIN Usuario u ON e.usuarioId = u.id " +
+                     "ORDER BY e.dataEmprestimo DESC";
+
+        try (Connection conn = ConexaoSQLite.getConexao();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                String dataDevolucao = rs.getString("dataDevolucao");
+                String status = (dataDevolucao == null) ? "EM ABERTO" : "DEVOLVIDO";
+                float multa = rs.getFloat("multa");
+                
+                String linha = String.format(
+                    "ID: %d | Livro: %s | Usuário: %s | Empréstimo: %s | Vencimento: %s | Devolução: %s | Multa: R$ %.2f | %s",
+                    rs.getInt("id"),
+                    rs.getString("titulo"),
+                    rs.getString("usuarioNome"),
+                    rs.getString("dataEmprestimo"),
+                    rs.getString("dataVencimento"),
+                    (dataDevolucao == null ? "---" : dataDevolucao),
+                    multa,
+                    status
+                );
+                todosEmprestimos.add(linha);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao listar todos os empréstimos: " + e.getMessage());
+        }
+        
+        return todosEmprestimos;
+    }    
     
 }
