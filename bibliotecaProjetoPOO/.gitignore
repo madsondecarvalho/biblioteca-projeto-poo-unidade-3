@@ -1,0 +1,10 @@
+/Admin.class
+/ConexaoSQLite.class
+/Emprestimo.class
+/EmprestimoDAO.class
+/Leitor.class
+/Livro.class
+/LivroDAO.class
+/SistemaBiblioteca.class
+/Usuario.class
+/UsuarioDAO.class
